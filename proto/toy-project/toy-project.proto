@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package hb.grpc.toyproject;
+
+option go_package = "toyprojectpb";
+option java_generic_services = true;
+option java_multiple_files = true;
+option java_outer_classname = "toyprojectSheetProto";
+option java_package = "com.hb.grpc.toyproject";
+
+service ToyProject {
+    rpc Ping(PingRequest) returns (PingReply);
+}
+
+message PingRequest{}
+message PingReply{
+ bool up = 1;
+}
