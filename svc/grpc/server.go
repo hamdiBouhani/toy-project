@@ -10,20 +10,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Server server instance
 type Server struct {
 	HostPort string
-	// log
-	Log *logrus.Logger
-
-	c *configs.Config
+	Log      *logrus.Logger
+	c        *configs.Config
 }
 
-func NewServer(
-	logger *logrus.Logger,
-	c *configs.Config,
-) (*Server, error) {
-
+func NewServer(logger *logrus.Logger, c *configs.Config) (*Server, error) {
 	return &Server{
 		HostPort: c.HostPort,
 		Log:      logger,
@@ -40,10 +33,8 @@ func (s *Server) Run() error {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterToyProjectServer(
-		grpcServer,
-		NewAPI(),
-	)
+
+	pb.RegisterToyProjectServer(grpcServer, NewAPI())
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Printf("failed to serve: %v", err)

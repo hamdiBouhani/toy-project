@@ -13,8 +13,5 @@ func NewAPI() pb.ToyProjectServer {
 }
 
 func (a *api) Ping(ctx context.Context, req *pb.PingRequest) (*pb.PingReply, error) {
-
-	return &pb.PingReply{
-		Up: true,
-	}, nil
+	return &pb.PingReply{Up: true}, nil
 }
