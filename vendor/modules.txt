@@ -20,6 +20,12 @@ github.com/go-playground/locales/currency
 github.com/go-playground/universal-translator
 # github.com/go-playground/validator/v10 v10.4.1
 github.com/go-playground/validator/v10
+# github.com/gogo/protobuf v1.2.1
+## explicit
+github.com/gogo/protobuf/jsonpb
+github.com/gogo/protobuf/proto
+github.com/gogo/protobuf/sortkeys
+github.com/gogo/protobuf/types
 # github.com/golang/protobuf v1.3.3
 ## explicit
 github.com/golang/protobuf/proto
