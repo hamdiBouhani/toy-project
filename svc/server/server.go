@@ -2,6 +2,7 @@ package server
 
 import (
 	"toy-project/svc/configs"
+	grpcServer "toy-project/svc/grpc"
 	"toy-project/svc/rest"
 
 	"github.com/pkg/errors"
@@ -11,6 +12,7 @@ import (
 type Server struct {
 	logger     logrus.FieldLogger
 	restServer *rest.Server
+	grpcServer *grpcServer.Server
 }
 
 func NewServer(logger *logrus.Logger, c *configs.Config) (*Server, error) {
@@ -24,13 +26,27 @@ func NewServer(logger *logrus.Logger, c *configs.Config) (*Server, error) {
 		return nil, errors.Wrap(err, "unable to create a new rest server")
 	}
 
+	grpcServer, err := grpcServer.NewServer(logger, c)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create a new rest server")
+	}
+
 	return &Server{
 		logger:     logger,
 		restServer: restServer,
+		grpcServer: grpcServer,
 	}, nil
 }
 
 func (s *Server) Run() error {
+
+	if s.grpcServer != nil {
+		go func() {
+			s.grpcServer.Run()
+		}()
+	} else {
+		s.logger.Infoln("no grpc server started")
+	}
 
 	if s.restServer != nil {
 		err := s.restServer.Run()
