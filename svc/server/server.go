@@ -15,11 +15,9 @@ type Server struct {
 	grpcServer *grpcServer.Server
 }
 
-func NewServer(logger *logrus.Logger, c *configs.Config) (*Server, error) {
-	if logger == nil {
-		logger = logrus.New()
-		logger.SetLevel(logrus.InfoLevel)
-	}
+func NewServer(c *configs.Config) (*Server, error) {
+	logger := logrus.New()
+	logger.SetLevel(logrus.InfoLevel)
 
 	restServer, err := rest.NewServer(logger, c)
 	if err != nil {
@@ -41,9 +39,7 @@ func NewServer(logger *logrus.Logger, c *configs.Config) (*Server, error) {
 func (s *Server) Run() error {
 
 	if s.grpcServer != nil {
-		go func() {
-			s.grpcServer.Run()
-		}()
+		go func() { s.grpcServer.Run() }()
 	} else {
 		s.logger.Infoln("no grpc server started")
 	}

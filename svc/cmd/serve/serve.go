@@ -7,13 +7,12 @@ import (
 	"toy-project/svc/configs"
 	"toy-project/svc/server"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var Cmd *cobra.Command
-
 var (
+	Cmd *cobra.Command
+
 	argAddress   string
 	argGRPCAddr  string
 	argDsn       string
@@ -32,29 +31,20 @@ func init() {
 			}
 		},
 	}
-	// HTTP Server port
+
 	Cmd.Flags().StringVarP(&argAddress, "address", "a", ":8080", "address to listen on")
 	Cmd.Flags().StringVar(&argGRPCAddr, "grpc-address", ":9301", "GRPC address of configurator")
-
-	// DB connection path
 	Cmd.Flags().StringVar(&argDsn, "dsn", "postgres://postgres@localhost:5432/toy_project_db?sslmode=disable", "db url")
-	// cors
 	Cmd.Flags().StringVar(&argCORSHosts, "cors-hosts", "*", "cors hosts, separated by comma")
 }
 
 func serve(cmd *cobra.Command, args []string) error {
-
-	logger := logrus.New()
-
-	c := &configs.Config{
+	svr, err := server.NewServer(&configs.Config{
 		HostPort:    argAddress,
 		GRPCAddress: argGRPCAddr,
 		Dsn:         argDsn,
-
-		CORSHosts: argCORSHosts,
-	}
-
-	svr, err := server.NewServer(logger, c)
+		CORSHosts:   argCORSHosts,
+	})
 	if err != nil {
 		return err
 	}
