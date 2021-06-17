@@ -15,6 +15,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/xo/dburl v0.8.4
 	go.mongodb.org/mongo-driver v1.5.3
+	go.uber.org/zap v1.10.0
 	golang.org/x/net v0.0.0-20200505041828-1ed23360d12c
 	google.golang.org/grpc v1.21.1
 )
