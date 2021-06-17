@@ -16,6 +16,9 @@ github.com/aws/aws-sdk-go/internal/strings
 github.com/aws/aws-sdk-go/internal/sync/singleflight
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/rest
+# github.com/cenkalti/backoff/v4 v4.1.1
+## explicit
+github.com/cenkalti/backoff/v4
 # github.com/coreos/go-oidc/v3 v3.0.0
 ## explicit
 github.com/coreos/go-oidc/v3/oidc
@@ -98,6 +101,9 @@ github.com/xdg-go/pbkdf2
 github.com/xdg-go/scram
 # github.com/xdg-go/stringprep v1.0.2
 github.com/xdg-go/stringprep
+# github.com/xo/dburl v0.8.4
+## explicit
+github.com/xo/dburl
 # github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d
 github.com/youmark/pkcs8
 # go.mongodb.org/mongo-driver v1.5.3

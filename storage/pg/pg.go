@@ -2,14 +2,73 @@ package pg
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"toy-project/storage"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/xo/dburl"
 )
 
 const defaultMaxOpenConns = 1000
+const defaultRetries = 6
+
+// Open connect to a database
+// if the database not exit then create it first
+// automatically migrate the database script after connecting finished
+func Open(dsn, migrationPath string) (storage.Storage, error) {
+
+	var db *sqlx.DB
+	var err error
+	retries := 0
+
+	n := defaultRetries - 1
+
+	u, err := dburl.Parse(dsn)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't parse database address, %w", err)
+	}
+	driver, dataSource := u.Driver, u.DSN
+	try := func() error {
+		log.Printf("Connecting to db, driver: %v, dsn: %v retries-left: %v", driver, dataSource, n-retries)
+
+		// Check if DSN is in order. If not, return nil and check err value.
+		db, err = sqlx.Open(driver, dataSource)
+		if err != nil {
+			// Bad DSN, we quit immediately
+			err = fmt.Errorf("bad dsn, %w", err)
+			return nil
+		}
+
+		if dbErr := db.Ping(); dbErr != nil {
+
+			retries++
+			return fmt.Errorf("couldn't ping db, %w", dbErr)
+		}
+
+		return nil
+	}
+
+	boff := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), uint64(n))
+	errBackoff := backoff.Retry(try, boff)
+
+	// Bad dsn.
+	if err != nil {
+		return nil, err
+	}
+
+	// Couldn't connect after n attempts.
+	if errBackoff != nil {
+		return nil, errBackoff
+	}
+
+	return &conn{
+		db: db,
+	}, nil
+}
 
 // conn is the main database connection.
 type conn struct {
