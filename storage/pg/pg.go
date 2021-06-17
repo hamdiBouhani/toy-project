@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"toy-project/storage"
 
 	"github.com/cenkalti/backoff/v4"
@@ -16,22 +17,22 @@ import (
 const defaultMaxOpenConns = 1000
 const defaultRetries = 6
 
-// Open connect to a database
-// if the database not exit then create it first
-// automatically migrate the database script after connecting finished
-func Open(dsn, migrationPath string) (storage.Storage, error) {
-
+// Connect tries to connect to a database up to n times.
+func Connect(dsn string, n int) (*sqlx.DB, error) {
 	var db *sqlx.DB
 	var err error
 	retries := 0
 
-	n := defaultRetries - 1
+	if n < 1 {
+		n = defaultRetries - 1
+	}
 
 	u, err := dburl.Parse(dsn)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't parse database address, %w", err)
 	}
 	driver, dataSource := u.Driver, u.DSN
+
 	try := func() error {
 		log.Printf("Connecting to db, driver: %v, dsn: %v retries-left: %v", driver, dataSource, n-retries)
 
@@ -64,6 +65,51 @@ func Open(dsn, migrationPath string) (storage.Storage, error) {
 	if errBackoff != nil {
 		return nil, errBackoff
 	}
+
+	return db, nil
+}
+
+func CreateDBIfNotExist(dsn string) error {
+	u, err := dburl.Parse(dsn)
+	if err != nil {
+		return fmt.Errorf("couldn't parse database address, %w", err)
+	}
+
+	// create db
+	dbname := strings.TrimPrefix(u.Path, "/")
+	if dbname != "" {
+		u.Path = ""
+		if cdb, err := Connect(u.String(), 1); err != nil {
+			return fmt.Errorf("Couldn't connect to db with dsn: %v, %w", u.String(), err)
+		} else {
+			_, err = cdb.Exec("CREATE DATABASE " + dbname)
+			if err == nil {
+				log.Printf("Created empty database %s, as it did not exist", dbname)
+			}
+			cdb.Close()
+		}
+	}
+
+	return nil
+}
+
+// Open connect to a database
+// if the database not exit then create it first
+// automatically migrate the database script after connecting finished
+func Open(dsn, migrationPath string) (storage.Storage, error) {
+
+	// Set up database connection.
+	if err := CreateDBIfNotExist(dsn); err != nil {
+		return nil, errors.Wrapf(err, "couldn't create db:%s", dsn)
+	}
+
+	db, err := Connect(dsn, 6)
+	if err != nil {
+		return nil, errors.Wrapf(err, "couldn't connect to db:%s", dsn)
+	}
+
+	db.SetMaxOpenConns(defaultMaxOpenConns)
+	db.SetMaxIdleConns(defaultMaxOpenConns / 100)
 
 	return &conn{
 		db: db,
