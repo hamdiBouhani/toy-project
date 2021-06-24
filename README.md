@@ -9,7 +9,7 @@ That expose  two microservices (Rest & gRPC):
 * Available Commands
 
 ```
-# => go run cmd/toy-project/main.go --help```
+# => go run cmd/toy-project/main.go --help
 
 Usage:
   toy-project [flags]
@@ -47,4 +47,53 @@ Flags:
 Global Flags:
   -v, --verbose   verbose output
 app starded successfully !!
+```
+
+Also, there is Make cmd to start project:
+> make -B start-app
+
+# Project structure
+
+```
+.
+├── cmd
+│   └── toy-project
+│       └── main.go
+├── go.mod
+├── go.sum
+├── Makefile
+├── pb
+│   └── toy-project
+│       └── toy-project.pb.go
+├── proto
+│   └── toy-project
+│       └── toy-project.proto
+├── README.md
+├── storage
+│   ├── mongo
+│   │   └── mongo.go
+│   ├── pg
+│   │   ├── connect.go
+│   │   ├── migrate.go
+│   │   └── pg.go
+│   └── storage.go
+├── svc
+│   ├── cmd
+│   │   └── serve
+│   │       └── serve.go
+│   ├── configs
+│   │   └── configs.go
+│   ├── gql
+│   │   └── server.go
+│   ├── grpc
+│   │   ├── api.go
+│   │   └── server.go
+│   ├── rest
+│   │   └── server.go
+│   └── server
+│       └── server.go
+└── thirdparty
+    └── tokenverifier.go
+
+18 directories, 20 files
 ```
