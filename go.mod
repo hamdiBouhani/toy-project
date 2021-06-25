@@ -3,6 +3,7 @@ module toy-project
 go 1.15
 
 require (
+	github.com/EchoUtopia/zerror v1.0.12
 	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/coreos/go-oidc/v3 v3.0.0
 	github.com/gin-contrib/pprof v1.3.0
@@ -18,5 +19,5 @@ require (
 	go.mongodb.org/mongo-driver v1.5.3
 	go.uber.org/zap v1.10.0
 	golang.org/x/net v0.0.0-20200505041828-1ed23360d12c
-	google.golang.org/grpc v1.21.1
+	google.golang.org/grpc v1.25.1
 )

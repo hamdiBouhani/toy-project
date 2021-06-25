@@ -2,6 +2,7 @@ package server
 
 import (
 	"toy-project/svc/configs"
+	"toy-project/svc/gql"
 	grpcServer "toy-project/svc/grpc"
 	"toy-project/svc/rest"
 
@@ -13,6 +14,7 @@ type Server struct {
 	logger     logrus.FieldLogger
 	restServer *rest.Server
 	grpcServer *grpcServer.Server
+	gqlServer  *gql.Server
 }
 
 func NewServer(c *configs.Config) (*Server, error) {
@@ -29,10 +31,16 @@ func NewServer(c *configs.Config) (*Server, error) {
 		return nil, errors.Wrap(err, "unable to create a new rest server")
 	}
 
+	gqlServer, err := gql.NewServer(logger, c)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create a new rest server")
+	}
+
 	return &Server{
 		logger:     logger,
 		restServer: restServer,
 		grpcServer: grpcServer,
+		gqlServer:  gqlServer,
 	}, nil
 }
 
@@ -42,6 +50,12 @@ func (s *Server) Run() error {
 		go func() { s.grpcServer.Run() }()
 	} else {
 		s.logger.Infoln("no grpc server started")
+	}
+
+	if s.gqlServer != nil {
+		go func() { s.gqlServer.Run() }()
+	} else {
+		s.logger.Infoln("no graphql server started")
 	}
 
 	if s.restServer != nil {

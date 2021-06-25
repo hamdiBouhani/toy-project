@@ -3,7 +3,6 @@ package gql
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -13,8 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // Handler a graphql Handle responds to an HTTP request.
@@ -42,37 +39,6 @@ func (h *Handler) Serve(c *gin.Context) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
-	}
-
-	for _, err := range res.Errors {
-		// lErr, ok := common.AsLicenseErr(err.ResolverError)
-		// if ok {
-		// 	err := status.Convert(lErr.Err)
-		// 	h.Log.Error("license error: ", err)
-		// 	code := err.Code()
-		// 	if code == codes.InvalidArgument || code == codes.PermissionDenied {
-		// 		http.Error(w, "payment required", http.StatusPaymentRequired)
-		// 	} else {
-		// 		http.Error(w, err.Message(), http.StatusInternalServerError)
-		// 	}
-
-		// 	return
-		// }
-		sbErr := err.ResolverError
-		for errors.Unwrap(sbErr) != nil {
-			sbErr = errors.Unwrap(sbErr)
-		}
-		sts, ok := status.FromError(sbErr)
-		if ok {
-			if sts.Code() == codes.PermissionDenied {
-				http.Error(w, sts.Message(), http.StatusForbidden)
-				return
-			}
-			if sts.Code() == codes.Unauthenticated {
-				http.Error(w, sts.Message(), http.StatusUnauthorized)
-				return
-			}
-		}
 	}
 
 	responseJSON, err := json.Marshal(res)
